@@ -5338,13 +5338,12 @@ var $elm$random$Random$generate = F2(
 				A2($elm$random$Random$map, tagger, generator)));
 	});
 var $author$project$Main$initModel = {
-	ans: _Utils_Tuple2(
-		_Utils_Tuple2(0, 0),
-		_Utils_Tuple2(0, 0)),
+	answerList: _List_Nil,
 	isReady2view: false,
 	matrix: _Utils_Tuple2(
 		_Utils_Tuple2(0, 0),
 		_Utils_Tuple2(0, 0)),
+	numOfProblems: 1,
 	values: _Utils_Tuple2(0, 0),
 	viewAnswer: false
 };
@@ -5530,7 +5529,12 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							ans: A2($author$project$SimultaneousEquation$cramersRule, mat, v),
+							answerList: _Utils_ap(
+								model.answerList,
+								_List_fromArray(
+									[
+										A2($author$project$SimultaneousEquation$cramersRule, mat, v)
+									])),
 							isReady2view: true,
 							matrix: mat,
 							values: v
@@ -5546,7 +5550,12 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{isReady2view: false, viewAnswer: false}),
+						{
+							answerList: (model.numOfProblems === 10) ? _List_Nil : model.answerList,
+							isReady2view: false,
+							numOfProblems: A2($elm$core$Basics$modBy, 10, model.numOfProblems) + 1,
+							viewAnswer: false
+						}),
 					A2(
 						$elm$random$Random$generate,
 						$author$project$Main$GetValues,
@@ -5555,15 +5564,6 @@ var $author$project$Main$update = F2(
 	});
 var $author$project$Main$GoNext = {$: 'GoNext'};
 var $author$project$Main$ViewAnswer = {$: 'ViewAnswer'};
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
-var $elm$html$Html$br = _VirtualDom_node('br');
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $author$project$SimultaneousEquation$i2s = $elm$core$String$fromInt;
@@ -5572,24 +5572,7 @@ var $author$project$SimultaneousEquation$fraction2String = function (_v0) {
 	var b = _v0.b;
 	return (b === 1) ? $author$project$SimultaneousEquation$i2s(a) : ($author$project$SimultaneousEquation$i2s(a) + ('/' + $author$project$SimultaneousEquation$i2s(b)));
 };
-var $elm$core$List$intersperse = F2(
-	function (sep, xs) {
-		if (!xs.b) {
-			return _List_Nil;
-		} else {
-			var hd = xs.a;
-			var tl = xs.b;
-			var step = F2(
-				function (x, rest) {
-					return A2(
-						$elm$core$List$cons,
-						sep,
-						A2($elm$core$List$cons, x, rest));
-				});
-			var spersed = A3($elm$core$List$foldr, step, _List_Nil, tl);
-			return A2($elm$core$List$cons, hd, spersed);
-		}
-	});
+var $elm$core$Basics$neq = _Utils_notEqual;
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -5606,6 +5589,10 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		$elm$html$Html$Events$on,
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$core$List$singleton = function (value) {
+	return _List_fromArray(
+		[value]);
 };
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
@@ -5630,41 +5617,74 @@ var $author$project$SimultaneousEquation$viewEquation = F2(
 			]);
 	});
 var $author$project$Main$view = function (model) {
-	return model.isReady2view ? A2(
+	return model.isReady2view ? (model.viewAnswer ? A2(
 		$elm$html$Html$div,
 		_List_Nil,
-		A2(
-			$elm$core$List$append,
-			A2(
-				$elm$core$List$intersperse,
-				A2($elm$html$Html$br, _List_Nil, _List_Nil),
+		_List_fromArray(
+			[
+				$elm$html$Html$text('Answer'),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				A2(
+					$elm$core$List$indexedMap,
+					F2(
+						function (n, _v0) {
+							var a = _v0.a;
+							var b = _v0.b;
+							return A2(
+								$elm$html$Html$div,
+								_List_Nil,
+								$elm$core$List$singleton(
+									$elm$html$Html$text(
+										$author$project$SimultaneousEquation$i2s(n + 1) + ('. x=' + ($author$project$SimultaneousEquation$fraction2String(a) + (' ,y=' + $author$project$SimultaneousEquation$fraction2String(b)))))));
+						}),
+					model.answerList)),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick($author$project$Main$GoNext)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Continue')
+					]))
+			])) : A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$text(
+				'Question ' + ($author$project$SimultaneousEquation$i2s(model.numOfProblems) + '.')),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
 				A2(
 					$elm$core$List$map,
-					$elm$html$Html$text,
+					function (s) {
+						return A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text(s)
+								]));
+					},
 					A2($author$project$SimultaneousEquation$viewEquation, model.matrix, model.values))),
-			_List_fromArray(
-				[
-					A2($elm$html$Html$br, _List_Nil, _List_Nil),
-					model.viewAnswer ? function (_v0) {
-					var a = _v0.a;
-					var b = _v0.b;
-					return $elm$html$Html$text(
-						'Answer : x=' + ($author$project$SimultaneousEquation$fraction2String(a) + (' ,y=' + $author$project$SimultaneousEquation$fraction2String(b))));
-				}(model.ans) : $elm$html$Html$text(''),
-					A2($elm$html$Html$br, _List_Nil, _List_Nil),
-					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Events$onClick(
-							model.viewAnswer ? $author$project$Main$GoNext : $author$project$Main$ViewAnswer)
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							model.viewAnswer ? 'Next' : 'ViewAnswer')
-						]))
-				]))) : $elm$html$Html$text('generating...');
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						(model.numOfProblems !== 10) ? $author$project$Main$GoNext : $author$project$Main$ViewAnswer)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						(model.numOfProblems !== 10) ? 'Next' : 'ViewAnswer')
+					]))
+			]))) : $elm$html$Html$text('generating...');
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{
