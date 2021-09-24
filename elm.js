@@ -4518,9 +4518,6 @@ var $elm$core$Set$toList = function (_v0) {
 	return $elm$core$Dict$keys(dict);
 };
 var $elm$core$Basics$GT = {$: 'GT'};
-var $author$project$Main$GetValues = function (a) {
-	return {$: 'GetValues', a: a};
-};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -5230,6 +5227,113 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
+var $author$project$Main$initModel = {
+	answerList: _List_Nil,
+	isFirstState: true,
+	isReady2view: false,
+	matrix: _Utils_Tuple2(
+		_Utils_Tuple2(0, 0),
+		_Utils_Tuple2(0, 0)),
+	maxProblems: 10,
+	numOfProblems: 0,
+	values: _Utils_Tuple2(0, 0),
+	viewAnswer: false
+};
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $elm$core$Platform$Sub$batch = _Platform_batch;
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Main$GetValues = function (a) {
+	return {$: 'GetValues', a: a};
+};
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
+};
+var $elm$core$Basics$modBy = _Basics_modBy;
+var $author$project$SimultaneousEquation$gcd = F2(
+	function (a, b) {
+		gcd:
+		while (true) {
+			if (_Utils_cmp(a, b) < 0) {
+				var $temp$a = b,
+					$temp$b = a;
+				a = $temp$a;
+				b = $temp$b;
+				continue gcd;
+			} else {
+				if (!b) {
+					return a;
+				} else {
+					var $temp$a = b,
+						$temp$b = A2($elm$core$Basics$modBy, b, a);
+					a = $temp$a;
+					b = $temp$b;
+					continue gcd;
+				}
+			}
+		}
+	});
+var $author$project$SimultaneousEquation$mapAll = F2(
+	function (f, _v0) {
+		var v1 = _v0.a;
+		var v2 = _v0.b;
+		return _Utils_Tuple2(
+			f(v1),
+			f(v2));
+	});
+var $author$project$SimultaneousEquation$commonDivide = function (_v0) {
+	commonDivide:
+	while (true) {
+		var a = _v0.a;
+		var b = _v0.b;
+		if (b < 0) {
+			var $temp$_v0 = _Utils_Tuple2(-a, -b);
+			_v0 = $temp$_v0;
+			continue commonDivide;
+		} else {
+			return A2(
+				$author$project$SimultaneousEquation$mapAll,
+				function (p) {
+					return (p / A2(
+						$author$project$SimultaneousEquation$gcd,
+						$elm$core$Basics$abs(a),
+						$elm$core$Basics$abs(b))) | 0;
+				},
+				_Utils_Tuple2(a, b));
+		}
+	}
+};
+var $author$project$SimultaneousEquation$determinate = function (_v0) {
+	var _v1 = _v0.a;
+	var a1 = _v1.a;
+	var a2 = _v1.b;
+	var _v2 = _v0.b;
+	var b1 = _v2.a;
+	var b2 = _v2.b;
+	return (a1 * b2) - (a2 * b1);
+};
+var $author$project$SimultaneousEquation$cramersRule = F2(
+	function (_v0, v) {
+		var a1 = _v0.a;
+		var a2 = _v0.b;
+		return A2(
+			$author$project$SimultaneousEquation$mapAll,
+			function (p) {
+				return $author$project$SimultaneousEquation$commonDivide(
+					_Utils_Tuple2(
+						p,
+						$author$project$SimultaneousEquation$determinate(
+							_Utils_Tuple2(a1, a2))));
+			},
+			_Utils_Tuple2(
+				$author$project$SimultaneousEquation$determinate(
+					_Utils_Tuple2(v, a2)),
+				$author$project$SimultaneousEquation$determinate(
+					_Utils_Tuple2(a1, v))));
+	});
 var $elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
 };
@@ -5337,18 +5441,6 @@ var $elm$random$Random$generate = F2(
 			$elm$random$Random$Generate(
 				A2($elm$random$Random$map, tagger, generator)));
 	});
-var $author$project$Main$initModel = {
-	answerList: _List_Nil,
-	isReady2view: false,
-	matrix: _Utils_Tuple2(
-		_Utils_Tuple2(0, 0),
-		_Utils_Tuple2(0, 0)),
-	numOfProblems: 1,
-	values: _Utils_Tuple2(0, 0),
-	viewAnswer: false
-};
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $elm$random$Random$map2 = F3(
 	function (func, _v0, _v1) {
 		var genA = _v0.a;
@@ -5378,9 +5470,6 @@ var $elm$random$Random$pair = F2(
 			genB);
 	});
 var $elm$core$Bitwise$and = _Bitwise_and;
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $elm$core$Bitwise$xor = _Bitwise_xor;
 var $elm$random$Random$peel = function (_v0) {
 	var state = _v0.a;
@@ -5426,93 +5515,15 @@ var $author$project$Main$randint = function () {
 }();
 var $author$project$Main$randVec2 = A2($elm$random$Random$pair, $author$project$Main$randint, $author$project$Main$randint);
 var $author$project$Main$randMatrix = A2($elm$random$Random$pair, $author$project$Main$randVec2, $author$project$Main$randVec2);
-var $elm$core$Basics$abs = function (n) {
-	return (n < 0) ? (-n) : n;
-};
-var $elm$core$Basics$modBy = _Basics_modBy;
-var $author$project$SimultaneousEquation$gcd = F2(
-	function (a, b) {
-		gcd:
-		while (true) {
-			if (_Utils_cmp(a, b) < 0) {
-				var $temp$a = b,
-					$temp$b = a;
-				a = $temp$a;
-				b = $temp$b;
-				continue gcd;
-			} else {
-				if (!b) {
-					return a;
-				} else {
-					var $temp$a = b,
-						$temp$b = A2($elm$core$Basics$modBy, b, a);
-					a = $temp$a;
-					b = $temp$b;
-					continue gcd;
-				}
-			}
-		}
-	});
-var $author$project$SimultaneousEquation$mapAll = F2(
-	function (f, _v0) {
-		var v1 = _v0.a;
-		var v2 = _v0.b;
-		return _Utils_Tuple2(
-			f(v1),
-			f(v2));
-	});
-var $author$project$SimultaneousEquation$commonDivide = function (_v0) {
-	commonDivide:
-	while (true) {
-		var a = _v0.a;
-		var b = _v0.b;
-		if (b < 0) {
-			var $temp$_v0 = _Utils_Tuple2(-a, -b);
-			_v0 = $temp$_v0;
-			continue commonDivide;
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
 		} else {
-			return A2(
-				$author$project$SimultaneousEquation$mapAll,
-				function (p) {
-					return (p / A2(
-						$author$project$SimultaneousEquation$gcd,
-						$elm$core$Basics$abs(a),
-						$elm$core$Basics$abs(b))) | 0;
-				},
-				_Utils_Tuple2(a, b));
+			return _default;
 		}
-	}
-};
-var $author$project$SimultaneousEquation$determinate = function (_v0) {
-	var _v1 = _v0.a;
-	var a1 = _v1.a;
-	var a2 = _v1.b;
-	var _v2 = _v0.b;
-	var b1 = _v2.a;
-	var b2 = _v2.b;
-	return (a1 * b2) - (a2 * b1);
-};
-var $author$project$SimultaneousEquation$cramersRule = F2(
-	function (_v0, v) {
-		var a1 = _v0.a;
-		var a2 = _v0.b;
-		return A2(
-			$author$project$SimultaneousEquation$mapAll,
-			function (p) {
-				return $author$project$SimultaneousEquation$commonDivide(
-					_Utils_Tuple2(
-						p,
-						$author$project$SimultaneousEquation$determinate(
-							_Utils_Tuple2(a1, a2))));
-			},
-			_Utils_Tuple2(
-				$author$project$SimultaneousEquation$determinate(
-					_Utils_Tuple2(v, a2)),
-				$author$project$SimultaneousEquation$determinate(
-					_Utils_Tuple2(a1, v))));
 	});
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -5546,23 +5557,39 @@ var $author$project$Main$update = F2(
 						model,
 						{viewAnswer: true}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'GoNext':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							answerList: (model.numOfProblems === 10) ? _List_Nil : model.answerList,
+							answerList: _Utils_eq(model.numOfProblems, model.maxProblems) ? _List_Nil : model.answerList,
+							isFirstState: false,
 							isReady2view: false,
-							numOfProblems: A2($elm$core$Basics$modBy, 10, model.numOfProblems) + 1,
+							numOfProblems: A2($elm$core$Basics$modBy, model.maxProblems, model.numOfProblems) + 1,
 							viewAnswer: false
 						}),
 					A2(
 						$elm$random$Random$generate,
 						$author$project$Main$GetValues,
 						A2($elm$random$Random$pair, $author$project$Main$randMatrix, $author$project$Main$randVec2)));
+			default:
+				var s = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							maxProblems: A2(
+								$elm$core$Maybe$withDefault,
+								0,
+								$elm$core$String$toInt(s))
+						}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Main$GoNext = {$: 'GoNext'};
+var $author$project$Main$OnInput = function (a) {
+	return {$: 'OnInput', a: a};
+};
 var $author$project$Main$ViewAnswer = {$: 'ViewAnswer'};
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
@@ -5572,6 +5599,17 @@ var $author$project$SimultaneousEquation$fraction2String = function (_v0) {
 	var b = _v0.b;
 	return (b === 1) ? $author$project$SimultaneousEquation$i2s(a) : ($author$project$SimultaneousEquation$i2s(a) + ('/' + $author$project$SimultaneousEquation$i2s(b)));
 };
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$max = $elm$html$Html$Attributes$stringProperty('max');
+var $elm$html$Html$Attributes$min = $elm$html$Html$Attributes$stringProperty('min');
 var $elm$core$Basics$neq = _Utils_notEqual;
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
@@ -5590,12 +5628,47 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
 var $elm$core$List$singleton = function (value) {
 	return _List_fromArray(
 		[value]);
 };
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$SimultaneousEquation$viewEquationHelper = F3(
 	function (x, y, v) {
 		return (!x) ? ($author$project$SimultaneousEquation$i2s(y) + ('y=' + $author$project$SimultaneousEquation$i2s(v))) : ((!y) ? ($author$project$SimultaneousEquation$i2s(x) + ('x=' + $author$project$SimultaneousEquation$i2s(v))) : ((y < 0) ? ($author$project$SimultaneousEquation$i2s(x) + ('x' + ($author$project$SimultaneousEquation$i2s(y) + ('y=' + $author$project$SimultaneousEquation$i2s(v))))) : ($author$project$SimultaneousEquation$i2s(x) + ('x+' + ($author$project$SimultaneousEquation$i2s(y) + ('y=' + $author$project$SimultaneousEquation$i2s(v)))))));
@@ -5617,7 +5690,41 @@ var $author$project$SimultaneousEquation$viewEquation = F2(
 			]);
 	});
 var $author$project$Main$view = function (model) {
-	return model.isReady2view ? (model.viewAnswer ? A2(
+	return model.isFirstState ? A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$text('input number of questions below...'),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$type_('number'),
+								$elm$html$Html$Events$onInput($author$project$Main$OnInput),
+								$elm$html$Html$Attributes$max('100'),
+								$elm$html$Html$Attributes$min('1'),
+								$elm$html$Html$Attributes$value(
+								$author$project$SimultaneousEquation$i2s(model.maxProblems))
+							]),
+						_List_Nil)
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick($author$project$Main$GoNext)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Next')
+					]))
+			])) : (model.isReady2view ? (model.viewAnswer ? A2(
 		$elm$html$Html$div,
 		_List_Nil,
 		_List_fromArray(
@@ -5677,24 +5784,19 @@ var $author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Events$onClick(
-						(model.numOfProblems !== 10) ? $author$project$Main$GoNext : $author$project$Main$ViewAnswer)
+						(!_Utils_eq(model.numOfProblems, model.maxProblems)) ? $author$project$Main$GoNext : $author$project$Main$ViewAnswer)
 					]),
 				_List_fromArray(
 					[
 						$elm$html$Html$text(
-						(model.numOfProblems !== 10) ? 'Next' : 'ViewAnswer')
+						(!_Utils_eq(model.numOfProblems, model.maxProblems)) ? 'Next' : 'ViewAnswer')
 					]))
-			]))) : $elm$html$Html$text('generating...');
+			]))) : $elm$html$Html$text('generating...'));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{
 		init: function (_v0) {
-			return _Utils_Tuple2(
-				$author$project$Main$initModel,
-				A2(
-					$elm$random$Random$generate,
-					$author$project$Main$GetValues,
-					A2($elm$random$Random$pair, $author$project$Main$randMatrix, $author$project$Main$randVec2)));
+			return _Utils_Tuple2($author$project$Main$initModel, $elm$core$Platform$Cmd$none);
 		},
 		subscriptions: function (_v1) {
 			return $elm$core$Platform$Sub$none;

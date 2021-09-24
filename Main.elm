@@ -1,7 +1,8 @@
 module Main exposing (..)
 import Browser
-import Html exposing (Html, button, br, div)
-import Html.Events exposing (onClick)
+import Html exposing (Html, button, br, div, input)
+import Html.Events exposing (onClick, onInput)
+import Html.Attributes as Attr exposing (type_)
 import SimultaneousEquation exposing (..)
 import Random exposing (Generator, generate)
 
@@ -12,6 +13,8 @@ type alias Model =
   , viewAnswer : Bool
   , numOfProblems : Int
   , answerList : List (Vec2 Fraction)
+  , maxProblems : Int
+  , isFirstState : Bool
   }
 
 initModel =
@@ -19,58 +22,77 @@ initModel =
   , values = (0,0)
   , isReady2view = False
   , viewAnswer = False
-  , numOfProblems = 1
+  , numOfProblems = 0
   , answerList = []
+  , maxProblems = 10
+  , isFirstState = True
   }
 
 view model =
-  if model.isReady2view
+  if model.isFirstState
   then
-    if model.viewAnswer
-    then
-      div []
-        [ Html.text "Answer"
-        , div []
-            ( model.answerList
-                |> List.indexedMap
-                  (\n (a,b) ->
-                    (i2s (n+1) ++ ". x=" ++ fraction2String a ++ " ,y=" ++ fraction2String b)
-                      |> Html.text
-                      |> List.singleton
-                      |> div []
-                  )
-            )
-        , button [ onClick GoNext ][ Html.text "Continue" ]
-        ]
-    else
-      div []
-        [ ("Question " ++ i2s model.numOfProblems ++ ".")
-            |> Html.text
-        , div []
-          ( viewEquation model.matrix model.values
-            |> List.map (\s -> div [][Html.text s])
-          )
-        , button
-          [ onClick
-            ( if model.numOfProblems /= 10
-              then GoNext
-              else ViewAnswer
-            )
+    div []
+      [ Html.text "input number of questions below..."
+      , div []
+          [ input
+            [ type_ "number"
+            , onInput OnInput
+            , Attr.max "100"
+            , Attr.min "1"
+            , Attr.value (i2s model.maxProblems)
+            ][]
           ]
-          [ Html.text
-            ( if model.numOfProblems /= 10
-              then "Next"
-              else "ViewAnswer"
-            )
-          ]
-        ]
+      , button [onClick GoNext][Html.text "Next"]
+      ]
   else
-    Html.text "generating..."
+    if model.isReady2view
+    then
+      if model.viewAnswer
+      then
+        div []
+          [ Html.text "Answer"
+          , div []
+              ( model.answerList
+                  |> List.indexedMap
+                    (\n (a,b) ->
+                      (i2s (n+1) ++ ". x=" ++ fraction2String a ++ " ,y=" ++ fraction2String b)
+                        |> Html.text
+                        |> List.singleton
+                        |> div []
+                    )
+              )
+          , button [ onClick GoNext ][ Html.text "Continue" ]
+          ]
+      else
+        div []
+          [ ("Question " ++ i2s model.numOfProblems ++ ".")
+              |> Html.text
+          , div []
+            ( viewEquation model.matrix model.values
+              |> List.map (\s -> div [][Html.text s])
+            )
+          , button
+            [ onClick
+              ( if model.numOfProblems /= model.maxProblems
+                then GoNext
+                else ViewAnswer
+              )
+            ]
+            [ Html.text
+              ( if model.numOfProblems /= model.maxProblems
+                then "Next"
+                else "ViewAnswer"
+              )
+            ]
+          ]
+    else
+      Html.text "generating..."
 
 type Msg
   = GetValues (Matrix Int, Vec2 Int)
   | ViewAnswer
   | GoNext
+  | OnInput String
 
 
 update msg model =
@@ -96,15 +118,23 @@ update msg model =
 
     GoNext ->
       ( { model
-        | numOfProblems = modBy 10 model.numOfProblems + 1
+        | numOfProblems = modBy model.maxProblems model.numOfProblems + 1
         , isReady2view = False
         , viewAnswer = False
         , answerList =
-            if model.numOfProblems == 10
+            if model.numOfProblems == model.maxProblems
             then []
             else model.answerList
+        , isFirstState = False
         }
       , generate GetValues (Random.pair randMatrix randVec2)
+      )
+
+    OnInput s ->
+      ( { model
+        | maxProblems = Maybe.withDefault 0 (String.toInt s)
+        }
+      , Cmd.none
       )
 
 main : Program () Model Msg
@@ -112,9 +142,7 @@ main =
   Browser.element
     { init =
         \_ ->
-          ( initModel
-          , generate GetValues (Random.pair randMatrix randVec2)
-          )
+          ( initModel, Cmd.none )
     , update = update
     , view = view
     , subscriptions = \_ -> Sub.none
